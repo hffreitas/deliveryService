@@ -1,0 +1,54 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:13.1-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
+  keycloak:
+    image: jboss/keycloak
+    ports:
+      - 8080:8080
+    environment:
+      - KEYCLOAK_LOGLEVEL=DEBUG
+      - PROXY_ADDRESS_FORWARDING=true
+      - KEYCLOAK_USER=keycloak
+      - KEYCLOAK_PASSWORD=keycloak
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_VENDOR=POSTGRES
+      - DB_ADDR=db
+      - DB_DATABASE=postgres
+      - DB_SCHEMA=keycloak
+      - KEYCLOAK_IMPORT=/realms/config.json
+    volumes:
+      - ../keycloak/realm-export.json:/realms/config.json
+    depends_on:
+      - db
+  sonarqube:
+    image: sonarqube:8.6.1-community
+    ports:
+      - 9000:9000
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://db:5432/postgres?currentSchema=sonar
+      - SONAR_JDBC_USERNAME=postgres
+      - SONAR_JDBC_PASSWORD=postgres
+      - SONAR_FORCEAUTHENTICATION=false
+    depends_on:
+      - db
+  flyway:
+    image: flyway/flyway:7.5.2
+    environment:
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=postgres
+      - FLYWAY_URL=jdbc:postgresql://db:5432/postgres?currentSchema=deliveryservice
+    command: -locations=filesystem:/flyway/sql -connectRetries=60 migrate
+    volumes:
+      - ../db/migration:/flyway/sql
+    depends_on:
+      - db

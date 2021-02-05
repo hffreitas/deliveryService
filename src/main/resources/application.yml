@@ -1,0 +1,28 @@
+server:
+  port: 5000
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=deliveryservice
+    username: postgres
+    password: postgres
+    initialization-mode: always
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8080/auth/realms/deliveryService/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8080/auth/realms/deliveryService
+springdoc:
+  packagesToScan: org.example.delivery
+  swagger-ui:
+    path: /swagger-ui.html
+  use-management-port: true
+  show-actuator: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: openapi, swaggerui
+  server:
+    port: 9090
+logging.level.org.springframework.security: DEBUG
