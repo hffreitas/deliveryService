@@ -26,13 +26,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     http.antMatcher("/v*/**")
         .authorizeRequests()
         .antMatchers(HttpMethod.GET).permitAll()
-        .anyRequest()
-        .authenticated()
-        .and()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .oauth2ResourceServer().jwt().jwtAuthenticationConverter(jwtAuthenticationConverter());
+        .antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
+        .antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+        .anyRequest().authenticated();
+
+    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+    http.oauth2ResourceServer().jwt().jwtAuthenticationConverter(jwtAuthenticationConverter());
+
+    http.cors().and().csrf().disable();
   }
 
   private JwtAuthenticationConverter jwtAuthenticationConverter() {

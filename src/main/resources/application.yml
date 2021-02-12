@@ -1,6 +1,9 @@
 server:
   port: 5000
+
 spring:
+  application:
+    name: delivery-service
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres?currentSchema=deliveryservice
     username: postgres
@@ -12,17 +15,18 @@ spring:
         jwt:
           jwk-set-uri: http://localhost:8080/auth/realms/deliveryService/protocol/openid-connect/certs
           issuer-uri: http://localhost:8080/auth/realms/deliveryService
-springdoc:
-  packagesToScan: org.example.delivery
-  swagger-ui:
-    path: /swagger-ui.html
-  use-management-port: true
-  show-actuator: true
+
 management:
   endpoints:
     web:
-      exposure:
-        include: openapi, swaggerui
-  server:
-    port: 9090
+      exposure.include: beans, env, health, info, metrics, mappings
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  show-actuator: true
+  swagger-ui:
+    groups-order: DESC
+
 logging.level.org.springframework.security: DEBUG

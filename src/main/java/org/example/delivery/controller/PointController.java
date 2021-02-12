@@ -1,8 +1,13 @@
 package org.example.delivery.controller;
 
+import static org.example.delivery.config.SwaggerConfig.BEARER_KEY_SECURITY_SCHEME;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.Collection;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.buf.UEncoder;
 import org.example.delivery.payload.PointRequest;
 import org.example.delivery.payload.PointResponse;
 import org.example.delivery.payload.PointUpdate;
@@ -31,23 +36,29 @@ public class PointController {
   @Autowired
   private final PointService pointService;
 
+  @Operation(summary = "Get list of points")
   @GetMapping("/all")
   @PreAuthorize("hasRole('Admin')")
   public Collection<PointResponse> getAllPoints() {
     return pointService.getAllPoints();
   }
 
+  @Operation(summary = "Get book by name")
   @GetMapping("/{name}")
   public PointResponse getPointByName(@PathVariable("name") String name) {
     return pointService.getPoint(name);
   }
 
+  @Operation(summary = "Create a point", security = {
+      @SecurityRequirement(name = BEARER_KEY_SECURITY_SCHEME)})
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public PointResponse createPoint(@RequestBody PointRequest pointRequest) {
     return pointService.createPoint(pointRequest);
   }
 
+  @Operation(summary = "Update a point", security = {
+      @SecurityRequirement(name = BEARER_KEY_SECURITY_SCHEME)})
   @PatchMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public PointResponse updatePoint(
@@ -56,6 +67,8 @@ public class PointController {
     return pointService.updatePoint(id, pointUpdate);
   }
 
+  @Operation(summary = "Delete a point", security = {
+      @SecurityRequirement(name = BEARER_KEY_SECURITY_SCHEME)})
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public void deletePoint(@PathVariable("id") UUID id) {
