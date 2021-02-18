@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.example.delivery.payload.PointRequest;
 import org.example.delivery.payload.PointResponse;
 import org.example.delivery.payload.PointUpdate;
+import org.example.delivery.security.dto.DeliveryUserDetails;
 import org.example.delivery.service.PointService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,7 @@ class PointControllerTest {
     Collection<PointResponse> points = Collections.singletonList(pointResponse);
     when(pointService.getAllPoints()).thenReturn(points);
 
-    Collection<PointResponse> result = pointController.getAllPoints();
+    Collection<PointResponse> result = pointController.getAllPoints(new DeliveryUserDetails());
 
     assertEquals(1, result.size());
   }

@@ -9,12 +9,19 @@ plugins {
     id "org.sonarqube" version "3.1.1"
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+sourceCompatibility = 11
 
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
+    }
+    integrationTestImplementation {
+        extendsFrom testImplementation
+    }
+    integrationTestRuntime {
+        extendsFrom testRuntime
     }
 }
 
@@ -22,24 +29,57 @@ repositories {
     mavenCentral()
 }
 
+ext{
+    set('findsecbugsversion', '1.7.1')
+    set('openapiVersion', '1.5.3')
+    set('springSecurityVersion', '2.5.0.RELEASE')
+    set('testcontainersVersion', '1.15.2')
+}
+
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integration-test/java')
+        }
+    }
+}
+
+task integrationTest(type: Test) {
+    group 'springboot-testing'
+    description 'Runs the integration tests'
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+
+
 dependencies {
+    annotationProcessor 'org.projectlombok:lombok'
+    compile "org.springdoc:springdoc-openapi-ui:${openapiVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
-    runtimeOnly 'org.postgresql:postgresql'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.7.1'
-    compile 'org.springdoc:springdoc-openapi-ui:1.5.3'
-    testCompile 'org.springdoc:springdoc-openapi-webmvc-core:1.5.3'
-    implementation 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation "org.springframework.security.oauth:spring-security-oauth2:${springSecurityVersion}"
+    implementation 'org.postgresql:postgresql:42.2.18'
 
+    spotbugsPlugins "com.h3xstream.findsecbugs:findsecbugs-plugin:${findsecbugsversion}"
+    testCompile "org.springdoc:springdoc-openapi-webmvc-core:${openapiVersion}"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
 }
 
 jacocoTestReport {
@@ -65,16 +105,18 @@ pmd {
     ignoreFailures = false
     toolVersion = "6.31.0"
 }
-pmdTest{
+pmdTest {
     enabled = false
 }
-spotbugs{
+spotbugs {
     ignoreFailures = false
     showStackTraces = true
     showProgress = true
     effort = 'max'
-    visitors = [ 'FindSqlInjection', 'SwitchFallthrough' ]
-    omitVisitors = [ 'FindNonShortCircuit' ]
+    visitors = ['FindSqlInjection', 'SwitchFallthrough']
+    omitVisitors = ['FindNonShortCircuit']
 }
 
 tasks['sonarqube'].dependsOn test
+check.dependsOn integrationTest
+integrationTest.mustRunAfter test

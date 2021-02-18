@@ -21,8 +21,13 @@ public class SwaggerConfig {
   @Value("${spring.application.name}")
   private transient String applicationName;
 
+  /**
+   * Customize openApi.
+   *
+   * @return OpenAPI
+   */
   @Bean
-  public OpenAPI customOpenAPI() {
+  public OpenAPI customOpenApi() {
     return new OpenAPI()
         .components(new Components().addSecuritySchemes(BEARER_KEY_SECURITY_SCHEME,
             new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer")

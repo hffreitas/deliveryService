@@ -7,10 +7,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import java.util.Collection;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.buf.UEncoder;
 import org.example.delivery.payload.PointRequest;
 import org.example.delivery.payload.PointResponse;
 import org.example.delivery.payload.PointUpdate;
+import org.example.delivery.security.dto.CurrentUser;
+import org.example.delivery.security.dto.DeliveryUserDetails;
 import org.example.delivery.service.PointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,8 +39,8 @@ public class PointController {
 
   @Operation(summary = "Get list of points")
   @GetMapping("/all")
-  @PreAuthorize("hasRole('Admin')")
-  public Collection<PointResponse> getAllPoints() {
+
+  public Collection<PointResponse> getAllPoints(@CurrentUser DeliveryUserDetails deliveryUserDetails) {
     return pointService.getAllPoints();
   }
 
@@ -52,7 +53,7 @@ public class PointController {
   @Operation(summary = "Create a point", security = {
       @SecurityRequirement(name = BEARER_KEY_SECURITY_SCHEME)})
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('Admin')")
   public PointResponse createPoint(@RequestBody PointRequest pointRequest) {
     return pointService.createPoint(pointRequest);
   }
@@ -60,7 +61,7 @@ public class PointController {
   @Operation(summary = "Update a point", security = {
       @SecurityRequirement(name = BEARER_KEY_SECURITY_SCHEME)})
   @PatchMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('Admin')")
   public PointResponse updatePoint(
       @PathVariable("id") UUID id,
       @RequestBody PointUpdate pointUpdate) {
@@ -70,7 +71,7 @@ public class PointController {
   @Operation(summary = "Delete a point", security = {
       @SecurityRequirement(name = BEARER_KEY_SECURITY_SCHEME)})
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('Admin')")
   public void deletePoint(@PathVariable("id") UUID id) {
     pointService.deletePoint(id);
   }

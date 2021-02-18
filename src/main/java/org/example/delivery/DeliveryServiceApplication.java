@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 
 /**
  * DeliveryServiceApplication class.
@@ -19,7 +20,9 @@ import org.springframework.context.annotation.PropertySource;
         description = "Spring REST API to delivery service"
     )
 )
-@PropertySource("classpath:application.yml")
+@PropertySources(
+    @PropertySource(value = "classpath:application.yml")
+)
 public class DeliveryServiceApplication {
   public static void main(String[] args) {
     SpringApplication.run(DeliveryServiceApplication.class, args);
