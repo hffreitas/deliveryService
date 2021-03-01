@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'jacoco'
-    id 'org.springframework.boot' version '2.4.2'
+    id 'org.springframework.boot' version '2.4.3'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'checkstyle'
     id 'pmd'
@@ -34,6 +34,8 @@ ext{
     set('openapiVersion', '1.5.3')
     set('springSecurityVersion', '2.5.0.RELEASE')
     set('testcontainersVersion', '1.15.2')
+    set('restAssuredVersion', '4.2.1')
+    set('postgresqlVersion', '42.2.18')
 }
 
 sourceSets {
@@ -61,8 +63,6 @@ configurations {
     }
 }
 
-
-
 dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     compile "org.springdoc:springdoc-openapi-ui:${openapiVersion}"
@@ -73,13 +73,19 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation "org.springframework.security.oauth:spring-security-oauth2:${springSecurityVersion}"
-    implementation 'org.postgresql:postgresql:42.2.18'
+    implementation "org.postgresql:postgresql:${postgresqlVersion}"
 
     spotbugsPlugins "com.h3xstream.findsecbugs:findsecbugs-plugin:${findsecbugsversion}"
     testCompile "org.springdoc:springdoc-openapi-webmvc-core:${openapiVersion}"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
     testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+    testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+    testImplementation "io.rest-assured:json-path:${restAssuredVersion}"
+    testImplementation "io.rest-assured:xml-path:${restAssuredVersion}"
+    testImplementation "io.rest-assured:rest-assured-common:${restAssuredVersion}"
+
+
 }
 
 jacocoTestReport {
@@ -115,6 +121,10 @@ spotbugs {
     effort = 'max'
     visitors = ['FindSqlInjection', 'SwitchFallthrough']
     omitVisitors = ['FindNonShortCircuit']
+}
+
+bootJar {
+    launchScript()
 }
 
 tasks['sonarqube'].dependsOn test
